@@ -1,0 +1,10 @@
+{
+    "port": 8080,
+    "hostname": "localhost",
+    "secret": "b481626b577a7022605fc44201cf58963d489b26ec701b0531da7ecdefef5724bf3b347829ca0b71dd434d41e9f4b0ded749dc54c0d3bbeaa1fe306f29b6f535",
+    "uri": {
+        "mongodb": "mongodb+srv://cope:77608e5eff2cc07692eceb9f52ba4c99acd1f6f76ae106c08353e6adcd46d800aae7ce05bda789f7b7887188a326853fa366489b7e14d662f7fc34ea784f84b1@cope.ua3lxtr.mongodb.net/?retryWrites=true&w=majority&appName=cope"
+    },
+    "dbName": "db",
+    "usersCollection": "users"
+}
