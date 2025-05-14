@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Settings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for scrollable content */
+            min-height: 100vh;
+            margin: 0;
+            padding-top: 40px; /* Add padding for better spacing */
+            padding-bottom: 40px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px; /* Wider for settings */
+        }
+        h1, h2 {
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        h1 .material-icons, h2 .material-icons {
+            margin-right: 10px;
+            font-size: 28px;
+        }
+        .settings-section {
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .settings-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #4285f4;
+        }
+        .btn {
+            background-color: #4285f4;
+            color: white;
+            padding: 10px 15px; /* Slightly smaller for settings page */
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            display: inline-flex; /* For icon alignment */
+            align-items: center;
+        }
+        .btn .material-icons {
+            margin-right: 5px;
+        }
+        .btn:hover {
+            background-color: #3367d6;
+        }
+        .btn-danger {
+            background-color: #db4437;
+        }
+        .btn-danger:hover {
+            background-color: #c23327;
+        }
+        .message {
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .message.success {
+            background-color: #e6f4ea;
+            color: #34a853;
+            border: 1px solid #c6e7d0;
+        }
+        .message.error {
+            background-color: #fce8e6;
+            color: #ea4335;
+            border: 1px solid #f7c5c0;
+        }
+        #deleteConfirmSection {
+            display: none; /* Hidden by default */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span class="material-icons">settings</span>User Settings</h1>
+
+        <!-- Change Username Section -->
+        <div class="settings-section">
+            <h2><span class="material-icons">account_circle</span>Change Username</h2>
+            <form id="changeUsernameForm">
+                <div class="input-group">
+                    <label for="newUsername">New Username</label>
+                    <input type="text" id="newUsername" name="newUsername" required minlength="3" maxlength="32">
+                </div>
+                <div class="input-group">
+                    <label for="currentPasswordForUsername">Current Password</label>
+                    <input type="password" id="currentPasswordForUsername" name="currentPasswordForUsername" required>
+                </div>
+                <button type="submit" class="btn"><span class="material-icons">edit</span>Save Username</button>
+            </form>
+            <div id="usernameMessage" class="message" style="display:none;"></div>
+        </div>
+
+        <!-- Change Password Section -->
+        <div class="settings-section">
+            <h2><span class="material-icons">lock</span>Change Password</h2>
+            <form id="changePasswordForm">
+                <div class="input-group">
+                    <label for="currentPassword">Current Password</label>
+                    <input type="password" id="currentPassword" name="currentPassword" required>
+                </div>
+                <div class="input-group">
+                    <label for="newPassword">New Password</label>
+                    <input type="password" id="newPassword" name="newPassword" required minlength="8" maxlength="32">
+                </div>
+                <div class="input-group">
+                    <label for="confirmNewPassword">Confirm New Password</label>
+                    <input type="password" id="confirmNewPassword" name="confirmNewPassword" required>
+                </div>
+                <button type="submit" class="btn"><span class="material-icons">vpn_key</span>Save Password</button>
+            </form>
+            <div id="passwordMessage" class="message" style="display:none;"></div>
+        </div>
+
+        <!-- Delete Account Section -->
+        <div class="settings-section">
+            <h2><span class="material-icons">delete_forever</span>Delete Account</h2>
+            <p>This action is irreversible. Please be certain.</p>
+            <form id="deleteAccountRequestForm">
+                <button type="submit" class="btn btn-danger"><span class="material-icons">warning</span>Request Account Deletion</button>
+            </form>
+            <div id="deleteRequestMessage" class="message" style="display:none;"></div>
+
+            <div id="deleteConfirmSection">
+                <h3>Confirm Deletion</h3>
+                <form id="deleteAccountConfirmForm">
+                    <div class="input-group">
+                        <label for="deletionToken">Confirmation Token (from email/message)</label>
+                        <input type="text" id="deletionToken" name="deletionToken" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="passwordForDelete">Current Password</label>
+                        <input type="password" id="passwordForDelete" name="passwordForDelete" required>
+                    </div>
+                    <button type="submit" class="btn btn-danger"><span class="material-icons">check_circle</span>Confirm & Delete Account</button>
+                </form>
+            </div>
+            <div id="deleteConfirmMessage" class="message" style="display:none;"></div>
+        </div>
+
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/auth/login'; // Redirect if not logged in
+        }
+
+        function showMessage(elementId, message, isSuccess) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.className = 'message ' + (isSuccess ? 'success' : 'error');
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 5000);
+        }
+
+        // Change Username
+        document.getElementById('changeUsernameForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const newUsername = document.getElementById('newUsername').value;
+            const password = document.getElementById('currentPasswordForUsername').value;
+            
+            const response = await fetch('/api/user/change-username', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ newUsername, password })
+            });
+            const result = await response.json();
+            showMessage('usernameMessage', result.message, response.ok);
+            if (response.ok) {
+                 document.getElementById('changeUsernameForm').reset();
+            }
+        });
+
+        // Change Password
+        document.getElementById('changePasswordForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+            if (newPassword !== confirmNewPassword) {
+                showMessage('passwordMessage', 'New passwords do not match.', false);
+                return;
+            }
+
+            const response = await fetch('/api/user/change-password', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ currentPassword, newPassword })
+            });
+            const result = await response.json();
+            showMessage('passwordMessage', result.message, response.ok);
+            if (response.ok) {
+                document.getElementById('changePasswordForm').reset();
+            }
+        });
+
+        // Delete Account - Step 1: Request Deletion
+        document.getElementById('deleteAccountRequestForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const response = await fetch('/api/user/delete-request', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const result = await response.json();
+            showMessage('deleteRequestMessage', result.message, response.ok);
+            if (response.ok && result.confirmationToken) {
+                document.getElementById('deleteConfirmSection').style.display = 'block';
+                document.getElementById('deletionToken').value = result.confirmationToken; // Pre-fill if desired, or instruct user
+            }
+        });
+
+        // Delete Account - Step 2: Confirm Deletion
+        document.getElementById('deleteAccountConfirmForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const confirmationToken = document.getElementById('deletionToken').value;
+            const password = document.getElementById('passwordForDelete').value;
+
+            const response = await fetch('/api/user/delete-confirm', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ confirmationToken, password })
+            });
+            const result = await response.json();
+            showMessage('deleteConfirmMessage', result.message, response.ok);
+            if (response.ok) {
+                localStorage.removeItem('token');
+                alert('Account deleted successfully. You will be redirected to the login page.');
+                window.location.href = '/auth/login';
+            }
+        });
+
+    </script>
+</body>
+</html>
