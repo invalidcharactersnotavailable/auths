@@ -1,10 +1,28 @@
 import { randomUUIDv7 } from "bun";
 import * as config from "../../../config.json";
 import { MongoClient } from "mongodb";
-import * as express from "express";
+import express from "express"; // Corrected import
+import * as bcrypt from "bcrypt";
+
+// Helper function to generate a random alphanumeric string of a given length
+function generateRandomString(length: number): string {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+}
+
+// Helper function to generate a recovery key in xxx-xxx-xxx format
+function generateRecoveryKey(): string {
+    return `${generateRandomString(3)}-${generateRandomString(3)}-${generateRandomString(3)}`;
+}
 
 const client = new MongoClient(config.uri.mongodb);
 const router = express.Router();
+const saltRounds = 10; // Cost factor for bcrypt hashing
+
 router.post("/", async(req, res) => {
     try {
         const { username, password } = req.body;
@@ -21,12 +39,18 @@ router.post("/", async(req, res) => {
             return res.status(400).json({ message: "password must be between 8-32 characters" });
         }
 
-        const a = Date.now();
+        const currentTime = Date.now();
+        const recoveryKey = generateRecoveryKey();
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
         const user = {
-            uuid: randomUUIDv7("hex", a),
+            uuid: randomUUIDv7("hex", currentTime),
             username: username,
-            password: password,
-            createdOn: a
+            password: hashedPassword, // Store hashed password
+            recoveryKeys: [recoveryKey],
+            createdOn: currentTime,
+            lastPasswordChange: currentTime,
+            lastUsernameChange: currentTime
         };
 
         await client.connect();
@@ -35,17 +59,27 @@ router.post("/", async(req, res) => {
 
         const existingUser = await users.findOne({ username });
         if (existingUser) {
+            // It's good practice to close the connection if an early return happens
+            if (client && client.topology && client.topology.isConnected()) {
+                await client.close();
+            }
             return res.status(400).json({ message: "username already exists" });
         }
 
         await users.insertOne(user);
-        res.status(201).json({ message: "user registered successfully" }).redirect("/auth/login");
+        res.status(201).json({ 
+            message: "user registered successfully", 
+            recoveryKey: recoveryKey 
+        });
+
     } catch (error) {
-        console.error(error);
+        console.error("Error during registration:", error);
         res.status(500).json({ message: "internal server error" });
     } finally {
-        await client.close();
+        if (client && client.topology && client.topology.isConnected()) {
+            await client.close();
+        }
     }
-})
+});
 
 export default router;

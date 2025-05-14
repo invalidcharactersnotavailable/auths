@@ -1,11 +1,11 @@
-import * as express from "express"
-import * as changePassword from "./changePassword"
-import * as changeUsername from "./changeUsername"
-import * as deleteAccount from "./deleteAccount"
-const router = express.Router()
+import express from "express"; // Corrected import
+import changePasswordRouter from "./changePassword";
+import changeUsernameRouter from "./changeUsername";
+import deleteAccountRouter from "./deleteAccount";
+const router = express.Router();
 
-router.use("/changePassword", changePassword)
-router.use("/changeUsername", changeUsername)
-router.use("/deleteAccount", deleteAccount)
+router.use("/changePassword", changePasswordRouter);
+router.use("/changeUsername", changeUsernameRouter);
+router.use("/deleteAccount", deleteAccountRouter);
 
-export default router
+export default router;

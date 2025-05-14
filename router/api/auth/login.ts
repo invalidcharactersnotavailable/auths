@@ -1,12 +1,11 @@
-import * as express from "express"
-import type { Request, Response } from "express";
-import { Router } from "express";
+import express, { Request, Response } from "express"; // Corrected import
 import { MongoClient } from "mongodb";
 import * as config from "../../../config.json";
 import * as jwt from "jsonwebtoken";
+import * as bcrypt from "bcrypt"; // Added bcrypt for password comparison
 
 const client = new MongoClient(config.uri.mongodb);
-const router = Router();
+const router = express.Router(); // Corrected: Use express.Router()
 
 router.post("/", async (req: Request, res: Response) => {
     try {
@@ -20,15 +19,26 @@ router.post("/", async (req: Request, res: Response) => {
 
         await client.connect();
         const db = client.db(config.dbName);
-        const users = db.collection(config.usersCollection);
+        const usersCollection = db.collection(config.usersCollection);
 
-        const user = await users.findOne({ username });
+        const user = await usersCollection.findOne({ username });
         if (!user) {
-            return res.status(401).json({ message: "invalid username" });
+            // It's good practice to close the connection if an early return happens
+            if (client && client.topology && client.topology.isConnected()) {
+                await client.close();
+            }
+            return res.status(401).json({ message: "Invalid username or password" }); // Generic message
         }
-        if (user.password !== password) {
-            return res.status(401).json({ message: "invalid password" });
+
+        // Compare hashed password
+        const isPasswordMatch = await bcrypt.compare(password, user.password);
+        if (!isPasswordMatch) {
+            if (client && client.topology && client.topology.isConnected()) {
+                await client.close();
+            }
+            return res.status(401).json({ message: "Invalid username or password" }); // Generic message
         }
+
         const token = jwt.sign(
             { 
                 uuid: user.uuid,
@@ -37,13 +47,15 @@ router.post("/", async (req: Request, res: Response) => {
             config.secret,
             { expiresIn: '24h' }
         );
-
-        res.status(200).json({ message: "login successful", token: token }).redirect("/user/dashboard");
+        // Removed .redirect("/user/dashboard") as it's an API endpoint returning JSON.
+        res.status(200).json({ message: "Login successful", token: token });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "internal server error" });
+        console.error("Error during login:", error);
+        res.status(500).json({ message: "Internal server error" });
     } finally {
-        await client.close();
+        if (client && client.topology && client.topology.isConnected()) {
+            await client.close();
+        }
     }
 });
 

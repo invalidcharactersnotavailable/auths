@@ -1,9 +1,9 @@
-import * as express from "express"
-import * as register from "./register"
-import * as login from "./login"
-const router = express.Router()
+import express from "express"; // Corrected import
+import registerRouter from "./register";
+import loginRouter from "./login";
+const router = express.Router();
 
-router.use("/register", register)
-router.use("/login", login)
+router.use("/register", registerRouter);
+router.use("/login", loginRouter);
 
-export default router
+export default router;
