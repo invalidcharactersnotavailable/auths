@@ -2,30 +2,41 @@ import { Request, Response, NextFunction } from "express";
 import * as jwt from "jsonwebtoken";
 import * as config from "../config.json";
 
-// Extend Express Request type to include user property
 interface AuthenticatedRequest extends Request {
-    user?: { uuid: string; username: string }; // Add other user properties if needed from token
+    user?: { uuid: string; username: string };
 }
 
 export const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    // Check for token in both cookie and Authorization header
     const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
+    const bearerToken = authHeader && authHeader.split(" ")[1];
+    const cookieToken = req.cookies?.token;
+    
+    const token = bearerToken || cookieToken;
+    const isApiRoute = req.path.startsWith('/api/');
 
-    if (token == null) {
-        return res.status(401).json({ message: "Unauthorized: No token provided" });
+    if (!token) {
+        if (isApiRoute) {
+            return res.status(401).json({ message: "Unauthorized: No token provided" });
+        }
+        return res.redirect('/auth/login');
     }
 
     jwt.verify(token, config.secret, (err: any, user: any) => {
         if (err) {
-            // Differentiate between token expiration and other errors if needed
             if (err.name === "TokenExpiredError") {
-                return res.status(401).json({ message: "Unauthorized: Token expired" });
+                if (isApiRoute) {
+                    return res.status(401).json({ message: "Unauthorized: Token expired" });
+                }
+                return res.redirect('/auth/login');
             }
-            return res.status(403).json({ message: "Forbidden: Invalid token" });
+            if (isApiRoute) {
+                return res.status(403).json({ message: "Forbidden: Invalid token" });
+            }
+            return res.redirect('/auth/login');
         }
-        // Token is valid, attach user payload to request object
-        // Ensure the payload structure matches what you sign in login.ts
-        req.user = user as { uuid: string; username: string }; 
+
+        req.user = user as { uuid: string; username: string };
         next();
     });
 };

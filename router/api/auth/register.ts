@@ -46,7 +46,7 @@ router.post("/", async(req, res) => {
             uuid: randomUUIDv7("hex", currentTime),
             username: username,
             password: hashedPassword,
-            recoveryKeys: [generateRecoveryKey(), generateRecoveryKey(), generateRecoveryKey(), generateRecoveryKey(), generateRecoveryKey],
+            recoveryKeys: [generateRecoveryKey(), generateRecoveryKey(), generateRecoveryKey(), generateRecoveryKey(), generateRecoveryKey()],
             recoveryKeyUsed: false,
             recoveryKeyUsedCount: 0,
             recoveryKeyUsedAt: [null, null, null, null, null],

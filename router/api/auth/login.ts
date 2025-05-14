@@ -48,7 +48,7 @@ router.post("/", async (req: Request, res: Response) => {
             { expiresIn: '24h' }
         );
         // Removed .redirect("/user/dashboard") as it's an API endpoint returning JSON.
-        res.status(200).json({ message: "Login successful", token: token });
+        res.status(200).json({ message: "Login successful"}).cookie("token", token, { maxAge: 86400000, httpOnly: true });
     } catch (error) {
         console.error("Error during login:", error);
         res.status(500).json({ message: "Internal server error" });

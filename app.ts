@@ -2,11 +2,19 @@ import express from "express"; // Corrected import
 import { Request, Response, NextFunction } from "express";
 import { port, hostname } from "./config.json";
 import mainRouter from "./router/main";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
+// Set view engine
+app.set("view engine", "ejs");
+app.set("views", "./views");
+
 // Middleware to parse JSON bodies
 app.use(express.json());
+
+// Middleware to parse cookies
+app.use(cookieParser());
 
 // Mount the main router
 app.use("/", mainRouter);
