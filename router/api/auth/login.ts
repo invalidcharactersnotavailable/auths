@@ -1,8 +1,8 @@
-import express, { Request, Response } from "express"; // Corrected import
+import express, { Request, Response } from "express";
 import { MongoClient } from "mongodb";
 import * as config from "../../../config.json";
 import * as jwt from "jsonwebtoken";
-import * as bcrypt from "bcrypt"; // Added bcrypt for password comparison
+import * as bcrypt from "bcrypt";
 
 const client = new MongoClient(config.uri.mongodb);
 const router = express.Router(); // Corrected: Use express.Router()

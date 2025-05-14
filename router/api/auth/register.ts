@@ -1,7 +1,7 @@
 import { randomUUIDv7 } from "bun";
 import * as config from "../../../config.json";
 import { MongoClient } from "mongodb";
-import express from "express"; // Corrected import
+import express from "express";
 import * as bcrypt from "bcrypt";
 
 // Helper function to generate a random alphanumeric string of a given length
@@ -14,14 +14,14 @@ function generateRandomString(length: number): string {
     return result;
 }
 
-// Helper function to generate a recovery key in xxx-xxx-xxx format
+// Helper function to generate a recovery key in xxx-xxxx-xxx format
 function generateRecoveryKey(): string {
-    return `${generateRandomString(3)}-${generateRandomString(3)}-${generateRandomString(3)}`;
+    return `${generateRandomString(3)}-${generateRandomString(4)}-${generateRandomString(3)}`;
 }
 
 const client = new MongoClient(config.uri.mongodb);
 const router = express.Router();
-const saltRounds = 10; // Cost factor for bcrypt hashing
+const saltRounds = 10;
 
 router.post("/", async(req, res) => {
     try {
@@ -40,14 +40,16 @@ router.post("/", async(req, res) => {
         }
 
         const currentTime = Date.now();
-        const recoveryKey = generateRecoveryKey();
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
         const user = {
             uuid: randomUUIDv7("hex", currentTime),
             username: username,
-            password: hashedPassword, // Store hashed password
-            recoveryKeys: [recoveryKey],
+            password: hashedPassword,
+            recoveryKeys: [generateRecoveryKey(), generateRecoveryKey(), generateRecoveryKey(), generateRecoveryKey(), generateRecoveryKey],
+            recoveryKeyUsed: false,
+            recoveryKeyUsedCount: 0,
+            recoveryKeyUsedAt: [null, null, null, null, null],
             createdOn: currentTime,
             lastPasswordChange: currentTime,
             lastUsernameChange: currentTime
@@ -67,10 +69,7 @@ router.post("/", async(req, res) => {
         }
 
         await users.insertOne(user);
-        res.status(201).json({ 
-            message: "user registered successfully", 
-            recoveryKey: recoveryKey 
-        });
+        res.status(201).json({ message: "user registered successfully" });
 
     } catch (error) {
         console.error("Error during registration:", error);

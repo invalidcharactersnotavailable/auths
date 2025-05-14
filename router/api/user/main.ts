@@ -1,4 +1,4 @@
-import express from "express"; // Corrected import
+import express from "express";
 import changePasswordRouter from "./changePassword";
 import changeUsernameRouter from "./changeUsername";
 import deleteAccountRouter from "./deleteAccount";
